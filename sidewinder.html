@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title></title>
+  <script type="text/javascript" src="coffee-script.js"></script>
+  <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <script type="text/coffeescript">
+    class Maze
+      constructor: ->
+        @rows = 0
+        @columns = 0
+        @draw()
+        @eraseWalls()
+        @eraseWallsFromNeighboringSide()
+
+      draw: ->
+        tableHtml = $('<table></table>')
+
+        while @rows < 4
+          rowHtml = $('<tr></tr>')
+
+          while @columns < 4
+            rowHtml.append $('<td></td>').attr('column', @columns).attr('row', @rows)
+            @columns += 1
+
+          tableHtml.append rowHtml
+
+          @rows += 1
+          @columns = 0
+
+        $('body').html(tableHtml)
+
+      eraseWalls: ->
+        for row in [0..3] # Start at the southwest corner
+          run = [] # This is a run of cells that have eastern boundary removed
+
+          for column in [0..3]
+            td = $("td[column=#{column}][row=#{row}]")
+
+            if column == 3 and row == 0
+              # Do nothing for top right
+
+            else if column == 3 # Must go north
+              td.addClass 'top'
+
+            else if row == 0 # Must go east
+              td.addClass 'right'
+
+            else # Go east, or choose a random entry in the run to go north
+              run.push(td)
+              if Math.random() > .5 # Go north
+                run[Math.floor(Math.random() * run.length)].addClass 'top'
+                run = []
+              else
+                td.addClass 'right'
+
+      eraseWallsFromNeighboringSide: ->
+        for td in $('td').toArray()
+          td = $(td)
+          column = td.attr('column')
+          row = td.attr('row')
+
+          if td.hasClass('right')
+            unless column-1 == 0
+              $("td[column=#{column-1}][row=#{row}]").addClass('left')
+
+          if td.hasClass('top')
+            $("td[column=#{column}][row=#{row-1}]").addClass('bottom')
+
+    new Maze()
+  </script>
+
+  <style type="text/css">
+    table {
+      border-collapse: collapse;
+    }
+
+    td {
+      padding: 50px;
+      border: 1px solid black;
+    }
+
+    .top {
+      border-top: 1px solid #fff;
+    }
+
+    .right {
+      border-right: 1px solid #fff;
+    }
+
+    .left {
+      border-left: 1px solid #fff;
+    }
+
+    .bottom {
+      border-bottom: 1px solid #fff;
+    }
+  </style>
+</head>
+<body>
+
+</body>
+</html>
